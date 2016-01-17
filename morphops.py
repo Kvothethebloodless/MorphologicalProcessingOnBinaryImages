@@ -6,8 +6,9 @@ import matplotlib.pyplot as plt
 
 
 class morphopsonbinimgs():
-	def __init__(self, filename):
-		self.img = cv2.imread(filename, 0)  # reads grayscale directly
+	def __init__(self, image):
+		# self.img = cv2.imread(filename, 0)  # reads grayscale directly
+		self.img = image
 		plt.ion()
 		plt.subplot(1, 2, 1)
 		plt.title('Gray scale')
@@ -18,6 +19,8 @@ class morphopsonbinimgs():
 		self.rows, self.columns = self.img.shape
 		self.create_windows()
 		self.pad_image()
+		self.dummyimage = self.binimg
+		self.dummypadimage = self.paddedbinimage
 
 		plt.imshow(self.binimg, 'gray')
 
@@ -117,6 +120,25 @@ class morphopsonbinimgs():
 			# print ('i',i)
 		self.median_crossimg = newimage
 
+	def open_cross(self):
+		dummyclass = morphopsonbinimgs(self.erod_crossimg)
+		dummyclass.dilate_cross()
+		self.open_crossimg = dummyclass.dil_crossimg
+
+	def close_cross(self):
+		dummyclass2 = morphopsonbinimgs(self.dil_crossimg)
+		dummyclass2.erode_cross()
+		self.close_crossimg = dummyclass2.erod_crossimg
+
+	def open_square(self):
+		dummyclass = morphopsonbinimgs(self.erod_squareimg)
+		dummyclass.dilate_square()
+		self.open_squareimg = dummyclass.dil_squareimg
+
+	def close_square(self):
+		dummyclass2 = morphopsonbinimgs(self.dil_squareimg)
+		dummyclass2.erode_square()
+		self.close_squareimg = dummyclass2.erod_squareimg
 
 	def all_ops(self):
 		self.dilate_cross()
@@ -125,6 +147,10 @@ class morphopsonbinimgs():
 		self.erode_square()
 		self.median_cross()
 		self.median_square()
+		self.open_cross()
+		self.open_square()
+		self.close_cross()
+		self.close_square()
 
 
 		plt.close('all')
@@ -153,6 +179,27 @@ class morphopsonbinimgs():
 		plt.subplot(4, 2, 8)
 		plt.title('Median Filter with square')
 		plt.imshow(self.median_squareimg, 'gray')
+
+		plt.figure()
+		plt.subplot(3, 2, 1)
+		plt.title('Original Grayscale Image')
+		plt.imshow(self.img, 'gray')
+		plt.subplot(3, 2, 2)
+		plt.title('Binary Grayscale Image')
+		plt.imshow(self.binimg, 'gray')
+		plt.subplot(3, 2, 3)
+		plt.title('Open-Cross image')
+		plt.imshow(self.open_crossimg, 'gray')
+		plt.subplot(3, 2, 4)
+		plt.title('Open-Square Image')
+		plt.imshow(self.open_squareimg, 'gray')
+		plt.subplot(3, 2, 5)
+		plt.title('Close-Cross Image')
+		plt.imshow(self.close_crossimg, 'gray')
+		plt.subplot(3, 2, 6)
+		plt.title('Close Square Image')
+		plt.imshow(self.close_squareimg, 'gray')
+
 	def getROIpixels(self, sqradius, row, col):
 		# gives a square worth of pixels centered around at row,col from the binary
 		# image. row and col are specified in normal numpy numbering. ie o to start. squareradius is the number of pixels
@@ -163,4 +210,5 @@ class morphopsonbinimgs():
 			raise ('Check radius of the square. Index exceeding the padded images maximum')
 
 
-a = morphopsonbinimgs('5.1.13.tiff')
+img = cv2.imread('5.1.11.tiff', 0)
+a = morphopsonbinimgs(img)
