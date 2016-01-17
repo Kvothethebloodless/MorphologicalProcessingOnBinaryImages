@@ -47,7 +47,7 @@ class morphopsonbinimgs():
 			for j in range(self.pad_columns, self.columns + self.pad_columns):
 				roi = self.getROIpixels(2, i, j)
 				roipixelarray = roi[self.cross5]
-				newimage[i - self.pad_rows, j - self.pad_columns] = np.any(roipixelarray)
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.all(roipixelarray)
 			# print ('j',j)
 			# print ('i',i)
 		self.dil_crossimg = newimage
@@ -60,7 +60,7 @@ class morphopsonbinimgs():
 			for j in range(self.pad_columns, self.columns + self.pad_columns):
 				roi = self.getROIpixels(2, i, j)
 				roipixelarray = roi[self.square3]
-				newimage[i - self.pad_rows, j - self.pad_columns] = np.any(roipixelarray)
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.all(roipixelarray)
 			# print ('j',j)
 			# print ('i',i)
 		self.dil_squareimg = newimage
@@ -73,7 +73,7 @@ class morphopsonbinimgs():
 			for j in range(self.pad_columns, self.columns + self.pad_columns):
 				roi = self.getROIpixels(2, i, j)
 				roipixelarray = roi[self.cross5]
-				newimage[i - self.pad_rows, j - self.pad_columns] = np.all(roipixelarray)
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.any(roipixelarray)
 			# print ('j',j)
 			# print ('i',i)
 		self.erod_crossimg = newimage
@@ -86,37 +86,73 @@ class morphopsonbinimgs():
 			for j in range(self.pad_columns, self.columns + self.pad_columns):
 				roi = self.getROIpixels(2, i, j)
 				roipixelarray = roi[self.square3]
-				newimage[i - self.pad_rows, j - self.pad_columns] = np.all(roipixelarray)
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.any(roipixelarray)
 			# print ('j',j)
 			# print ('i',i)
 		self.erod_squareimg = newimage
+
+	def median_square(self):
+		img = self.paddedbinimage;
+		rows, cols = img.shape
+		newimage = np.empty_like(self.binimg)
+		for i in range(self.pad_rows, self.rows + self.pad_rows):
+			for j in range(self.pad_columns, self.columns + self.pad_columns):
+				roi = self.getROIpixels(2, i, j)
+				roipixelarray = roi[self.square3]
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.median(roipixelarray)
+			# print ('j',j)
+			# print ('i',i)
+		self.median_squareimg = newimage
+
+	def median_cross(self):
+		img = self.paddedbinimage;
+		rows, cols = img.shape
+		newimage = np.empty_like(self.binimg)
+		for i in range(self.pad_rows, self.rows + self.pad_rows):
+			for j in range(self.pad_columns, self.columns + self.pad_columns):
+				roi = self.getROIpixels(2, i, j)
+				roipixelarray = roi[self.cross5]
+				newimage[i - self.pad_rows, j - self.pad_columns] = np.median(roipixelarray)
+			# print ('j',j)
+			# print ('i',i)
+		self.median_crossimg = newimage
+
 
 	def all_ops(self):
 		self.dilate_cross()
 		self.dilate_square()
 		self.erode_cross()
 		self.erode_square()
+		self.median_cross()
+		self.median_square()
+
+
 		plt.close('all')
 		plt.figure()
-		plt.subplot(3, 2, 1)
+		plt.subplot(4, 2, 1)
 		plt.title('Original Grayscale Image')
 		plt.imshow(self.img, 'gray')
-		plt.subplot(3, 2, 2)
+		plt.subplot(4, 2, 2)
 		plt.title('Binary Grayscale Image')
 		plt.imshow(self.binimg, 'gray')
-		plt.subplot(3, 2, 3)
+		plt.subplot(4, 2, 3)
 		plt.title('Dilated with cross')
 		plt.imshow(self.dil_crossimg, 'gray')
-		plt.subplot(3, 2, 4)
+		plt.subplot(4, 2, 4)
 		plt.title('Dilated with square')
 		plt.imshow(self.dil_squareimg, 'gray')
-		plt.subplot(3, 2, 5)
+		plt.subplot(4, 2, 5)
 		plt.title('Eroded with cross')
 		plt.imshow(self.erod_crossimg, 'gray')
-		plt.subplot(3, 2, 6)
+		plt.subplot(4, 2, 6)
 		plt.title('Eroded with square')
 		plt.imshow(self.erod_squareimg, 'gray')
-
+		plt.subplot(4, 2, 7)
+		plt.title('Median Filter with cross')
+		plt.imshow(self.median_crossimg, 'gray')
+		plt.subplot(4, 2, 8)
+		plt.title('Median Filter with square')
+		plt.imshow(self.median_squareimg, 'gray')
 	def getROIpixels(self, sqradius, row, col):
 		# gives a square worth of pixels centered around at row,col from the binary
 		# image. row and col are specified in normal numpy numbering. ie o to start. squareradius is the number of pixels
